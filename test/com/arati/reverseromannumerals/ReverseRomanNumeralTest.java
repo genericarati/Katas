@@ -9,7 +9,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ReverseRomanNumerals {
+public class ReverseRomanNumeralTest {
 
 	ReverseRomanNumeral reverseRomanNumeral = new ReverseRomanNumeral();
 	Map<Integer, String> inputMap = new HashMap<>();
