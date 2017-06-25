@@ -1,16 +1,20 @@
 package com.arati.stringcalculator;
 
+import java.util.regex.Pattern;
+
 public class StringCalculator {
 
-	public int add(String addNumbers) throws Exception {
-		String splitRegEx = regExWithDelimiter(addNumbers);
+	public int add(final String addNumbers) throws Exception {
 		try {
 			if (addNumbers == "") {
 				return 0;
 			}
-			if (validInput(addNumbers,createValidateInputRegEx(addNumbers))) {
+			String stringToOperateOn = getStringToOperateOn(addNumbers);
+			
+			if (validInput(stringToOperateOn,createValidateInputRegEx(stringToOperateOn))) {
 				int sum = 0;
-				String[] numbersSplittedOnComma = addNumbers.split(splitRegEx);
+				String splitRegEx = regExWithDelimiter(addNumbers);
+				String[] numbersSplittedOnComma = stringToOperateOn.split(splitRegEx);
 
 				if (numbersSplittedOnComma.length > 0) {
 					for (int index = 0; index < numbersSplittedOnComma.length; index++) {
@@ -28,13 +32,26 @@ public class StringCalculator {
 		return 0;
 	}
 
-	public String createValidateInputRegEx(String addNumbers) {
-		String validateInputRegEx = "^\\d*(((\\n)*\\d*(,)*)|((,)*\\d*(\\n)*))*\\d+$";
+	public String getStringToOperateOn(final String addNumbers) {
+		String newString = addNumbers.replace("\n", "\\n");
+		if (isDifferentDelimiter(addNumbers)) {
+			newString = newString.substring(2);
+		}
+		return newString;
+	}
+
+	public Pattern createValidateInputRegEx(String addNumbers) {
+		String digit = "\\d";
+		String newLine = "\\n";
+		String validateInputRegEx = "^(" + digit + ")*(((" + newLine + ")*(" + digit + ")*(,)*)|((,)*(" + digit + ")*("
+				+ newLine + ")*))*(" + digit + ")+$";
 		if (isDifferentDelimiter(addNumbers)) {
 			String differentDelimiter = getDelimiter(addNumbers);
-			return validateInputRegEx.replace(",", differentDelimiter);
+			return Pattern.compile(validateInputRegEx.replace(",", differentDelimiter));
 		}
-		return validateInputRegEx;
+		System.out.println(validateInputRegEx);
+
+		return Pattern.compile(validateInputRegEx);
 	}
 
 	private String regExWithDelimiter(String addNumbers) {
@@ -51,11 +68,12 @@ public class StringCalculator {
 		return addNumbers.substring(2, 3);
 	}
 
-	private boolean validInput(String addNumbers, String validateInputRegEx) throws Exception {
-		if (!addNumbers.matches(validateInputRegEx)) {
+	private boolean validInput(String addNumbers, Pattern pattern) throws Exception {
+
+		if (!pattern.matcher(addNumbers).matches()) {
 			throw new Exception("Invalid input");
-		} else
-			return addNumbers.matches(validateInputRegEx);
+		}
+		return pattern.matcher(addNumbers).matches();
 	}
 
 	public boolean isDifferentDelimiter(String addNumbers) {
