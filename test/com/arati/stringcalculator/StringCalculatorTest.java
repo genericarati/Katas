@@ -1,6 +1,8 @@
 package com.arati.stringcalculator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,10 +49,32 @@ public class StringCalculatorTest {
 	public void OneNewLineTwoCommaThreeShouldReturn6() throws Exception {
 		StringCalculator stringCalculator = new StringCalculator();
 		String addNumbers = "1\n2,3";
-		
 		int sum = stringCalculator.add(addNumbers);
 		assertEquals(6, sum);
 	}
+	
+	@Test
+	public void PatternMatcher() throws Exception{
+		StringCalculator stringCalculator = new StringCalculator();
+		String addNumbers = "1\n2,3";
+		String stringToOperateOn = stringCalculator.getStringToOperateOn(addNumbers);
+		Pattern validateInputRegEx = stringCalculator.createValidateInputRegEx(stringToOperateOn);
+		boolean validInput = stringCalculator.validInput(stringToOperateOn, validateInputRegEx);
+		assertTrue(validInput);
+	}
+	
+	
+	
+	@Test
+	public void Pattern1Matcher() throws Exception{
+		StringCalculator stringCalculator = new StringCalculator();
+		String addNumbers = "//;\n1;2";
+		String stringToOperateOn = stringCalculator.getStringToOperateOn(addNumbers);
+		Pattern validateInputRegEx = stringCalculator.createValidateInputRegEx(addNumbers);
+		boolean validInput = stringCalculator.validInput(stringToOperateOn, validateInputRegEx);
+		assertTrue(validInput);
+	}
+	
 	
 	@Test
 	public void SemiColonAndStringSumShouldReturnCorrectSum() throws Exception {
@@ -64,29 +88,26 @@ public class StringCalculatorTest {
 	public void getStringToOperateOn(){
 		StringCalculator stringCalculator = new StringCalculator();
 		String addNumbers = "//;\n1;2";
-		assertEquals(";\\n1;2", stringCalculator.getStringToOperateOn(addNumbers) );
+		assertEquals("\n1;2", stringCalculator.getStringToOperateOn(addNumbers) );
 	}
 
 	@Test
 	public void validString() {
-		String regExp2 ="^(\\d)*(((\\n)*(\\d)*(,)*)|((,)*(\\d)*(\\n)*))*(\\d)+$";
-		String regExp = "^(\\d)*(((\\n)*(\\d)*(,)*)|((,)*(\\d)*(\\n)*))*(\\d)+$";
-		  
-		String regExp1 = "^(\\d)*(((\\n)*(\\d)*(;)*)|((;)*(\\d)*(\\n)*))*(\\d)+$";
+		StringCalculator stringCalculator = new StringCalculator();
 		String s = "1,\n,2,3";
 		String s2 = "1\n2,3";
-		
-		assertTrue(s2.matches(regExp2));
-		String addNumbers = "//;\n1;2";
-		assertTrue(s.matches(regExp));
-		assertTrue(addNumbers.substring(2).matches(regExp1));
+		String regex = "^((\\n*\\d*(;)*)|((;)*\\d*\\n*))*\\d+$";
+		assertTrue(s2.matches(stringCalculator.validateInputRegEx));
+		String addNumbers = ";\n1;2";
+		assertTrue(s.matches(stringCalculator.validateInputRegEx));
+		assertTrue(addNumbers.matches(regex));
 	}
 
 	@Test
 	public void invalidString() {
-		String regExp = "^\\d*(((\\n)*\\d*(,)*)|((,)*\\d*(\\n)*))*\\d+$";
+		StringCalculator stringCalculator = new StringCalculator();
 		String s = "1,\n";
-		assertFalse(s.matches(regExp));
+		assertFalse(s.matches(stringCalculator.validateInputRegEx));
 	}
 	
 	@Rule
@@ -115,12 +136,36 @@ public class StringCalculatorTest {
 		assertFalse(calculator.isDifferentDelimiter(addNumbers));
 	}
 	
-//	@Test
-//	public void createValidateRegExpTestWithSemiColon() {
-//		StringCalculator calculator = new StringCalculator();
-//		String addNumbers="//;1;2\n";
-//		String createValidateInputRegEx = calculator.createValidateInputRegEx(addNumbers);
-//		assertEquals("^(\\d)*(((\\n)*(\\d)*(;)*)|((;)*(\\d)*(\\n)*))*(\\d)+$", createValidateInputRegEx);
-//	}
+	@Test
+	public void createValidateRegExpTestWithSemiColon() {
+		StringCalculator calculator = new StringCalculator();
+		String addNumbers="//;1;2\n";
+		Pattern createValidateInputRegEx = calculator.createValidateInputRegEx(addNumbers);
+		assertEquals(calculator.validateInputRegEx.replace(',', ';'), createValidateInputRegEx.toString());
+	}
+	
+
+	@Rule
+	public ExpectedException thrown1 = ExpectedException.none();
+
+	@Test
+	public void shouldReturnExceptionWhenInputIsNegativeNumber() throws Exception{
+		StringCalculator stringCalculator = new StringCalculator();
+		String addNumbers = "-11,\n";
+		thrown.expectMessage("negatives not allowed -11");
+		stringCalculator.add(addNumbers);
+		
+	}
+	
+	@Test
+	public void findNumbera(){
+		StringCalculator stringCalculator = new StringCalculator();
+		String addNumbers = "1";
+		//stringCalculator.findNumbers(addNumbers);
+		Pattern pattern = Pattern.compile("^[1-9][0-9]*$");
+		Matcher matcher = pattern.matcher(addNumbers);
+		String pageNumber = matcher.group(1);
+		assertEquals("-11",pageNumber);
+	}
 
 }

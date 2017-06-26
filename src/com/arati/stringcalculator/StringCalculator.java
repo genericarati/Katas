@@ -3,22 +3,24 @@ package com.arati.stringcalculator;
 import java.util.regex.Pattern;
 
 public class StringCalculator {
+	
+	public final String validateInputRegEx = "^((\\n*\\d*(,)*)|((,)*\\d*\\n*))*\\d+$";
 
 	public int add(final String addNumbers) throws Exception {
 		try {
 			if (addNumbers == "") {
 				return 0;
 			}
+			Pattern inputRegEx = createValidateInputRegEx(addNumbers);
 			String stringToOperateOn = getStringToOperateOn(addNumbers);
-			
-			if (validInput(stringToOperateOn,createValidateInputRegEx(stringToOperateOn))) {
+			if (validInput(stringToOperateOn,inputRegEx)) {
 				int sum = 0;
 				String splitRegEx = regExWithDelimiter(addNumbers);
 				String[] numbersSplittedOnComma = stringToOperateOn.split(splitRegEx);
 
 				if (numbersSplittedOnComma.length > 0) {
 					for (int index = 0; index < numbersSplittedOnComma.length; index++) {
-						if (numbersSplittedOnComma[index] != "") {
+						if (numbersSplittedOnComma[index] != "" && numbersSplittedOnComma[index].length() > 0) {
 							sum += Integer.parseInt(numbersSplittedOnComma[index]);
 						}
 					}
@@ -33,23 +35,19 @@ public class StringCalculator {
 	}
 
 	public String getStringToOperateOn(final String addNumbers) {
-		String newString = addNumbers.replace("\n", "\\n");
+		String newString = addNumbers;
 		if (isDifferentDelimiter(addNumbers)) {
-			newString = newString.substring(2);
+			newString = newString.substring(3);
 		}
 		return newString;
 	}
 
 	public Pattern createValidateInputRegEx(String addNumbers) {
-		String digit = "\\d";
-		String newLine = "\\n";
-		String validateInputRegEx = "^(" + digit + ")*(((" + newLine + ")*(" + digit + ")*(,)*)|((,)*(" + digit + ")*("
-				+ newLine + ")*))*(" + digit + ")+$";
+		
 		if (isDifferentDelimiter(addNumbers)) {
 			String differentDelimiter = getDelimiter(addNumbers);
 			return Pattern.compile(validateInputRegEx.replace(",", differentDelimiter));
 		}
-		System.out.println(validateInputRegEx);
 
 		return Pattern.compile(validateInputRegEx);
 	}
@@ -68,7 +66,7 @@ public class StringCalculator {
 		return addNumbers.substring(2, 3);
 	}
 
-	private boolean validInput(String addNumbers, Pattern pattern) throws Exception {
+	public boolean validInput(String addNumbers, Pattern pattern) throws Exception {
 
 		if (!pattern.matcher(addNumbers).matches()) {
 			throw new Exception("Invalid input");
